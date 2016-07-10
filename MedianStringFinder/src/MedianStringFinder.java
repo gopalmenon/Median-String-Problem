@@ -71,7 +71,7 @@ public class MedianStringFinder {
 		
 		this.globalBestScore = Integer.MAX_VALUE;
 		bestMedianString = EMPTY_STRING;
-		getMedianString(targetLength, EMPTY_STRING);
+		findMedianStringAtDepth(targetLength, EMPTY_STRING);
 		return this.bestMedianString;
 		
 	}
@@ -81,7 +81,7 @@ public class MedianStringFinder {
 	 * @param medianString
 	 * recursively find a median string of the required length
 	 */
-	private void getMedianString(int numberOfCharsInRemainingMedianString, String medianString) {
+	private void findMedianStringAtDepth(int numberOfCharsInRemainingMedianString, String medianString) {
 		
 		int currentScore = 0;
 		if (numberOfCharsInRemainingMedianString == 0) {
@@ -100,7 +100,7 @@ public class MedianStringFinder {
 		
 		//Append all possible base combinations to current median string and add nodes to the search tree
 		for (char base : Nucleotide.validBases) {
-			getMedianString(numberOfCharsInRemainingMedianString - 1, (new StringBuffer(medianString).append(base)).toString());
+			findMedianStringAtDepth(numberOfCharsInRemainingMedianString - 1, (new StringBuffer().append(medianString).append(base)).toString());
 		}
 		
 	}
@@ -118,7 +118,7 @@ public class MedianStringFinder {
 		
 		//Find the minimum hamming distance between the proposed median string and each DNA sequence
 		for (int dnaSequenceCounter = 0; dnaSequenceCounter < this.numberOfDnaSequences; ++dnaSequenceCounter) {
-			int minimumHamingDistance = 0, currentMinimumHamingDistance = 0;
+			int minimumHamingDistance = Integer.MAX_VALUE, currentMinimumHamingDistance = 0;
 			for (int medianStringStartPosition = 0; medianStringStartPosition < maximumMedianStringStartPosition; ++medianStringStartPosition) {
 				
 				List<Nucleotide> dnaSubSequence = this.dnaSequences.get(dnaSequenceCounter).subList(medianStringStartPosition, medianStringStartPosition + proposedMedianStringLength);

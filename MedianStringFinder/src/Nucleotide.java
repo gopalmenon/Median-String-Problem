@@ -17,10 +17,12 @@ public class Nucleotide {
 
 		
 		boolean isValidBase = false;
+		String baseUpperCase = null;
+		baseUpperCase = new StringBuffer().append(base).toString().toUpperCase();
 		for (char validBase : validBases) {
-			if (base == validBase) {
+			if (baseUpperCase.charAt(0) == validBase) {
 				isValidBase = true;
-				this.base = base;
+				this.base = baseUpperCase.charAt(0);
 				break;
 			}
 		}
