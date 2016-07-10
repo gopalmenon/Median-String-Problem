@@ -1,19 +1,24 @@
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class MedianStringFinder {
 
+	public static final String EMPTY_STRING = "";
+	public static int BRANCH_AND_BOUND_TEST_START_LENGTH = 4;
+	
 	private int numberOfDnaSequences;
 	private int dnaSequenceLength;
-	private int targetMedianStringLength;
 	private List<List<Nucleotide>> dnaSequences;
+	private String bestMedianString;
+	private int globalBestScore;
 	
 	/**
 	 * Constructor
 	 * @param DnaSequences - list of DNA sequences. Each DNA sequence needs to be of the same length.
 	 * @throws Exception 
 	 */
-	public MedianStringFinder(List<List<Nucleotide>> dnaSequences, int targetMedianStringLength) throws Exception {
+	public MedianStringFinder(List<List<Nucleotide>> dnaSequences) throws Exception {
 		
 		//The DNA sequence need to exist
 		if (dnaSequences == null) {
@@ -47,13 +52,6 @@ public class MedianStringFinder {
 		this.dnaSequenceLength = testDnaSequenceLength;
 		this.dnaSequences = dnaSequences;
 		
-		//Median string length must be more than 0
-		if (targetMedianStringLength > 0) {
-			this.targetMedianStringLength = targetMedianStringLength;
-		} else {
-			throw new Exception("Target median string length must be more than 0");
-		}
-		
 	}
 
 	public int getNumberOfDnaSequences() {
@@ -64,8 +62,107 @@ public class MedianStringFinder {
 		return dnaSequenceLength;
 	}
 
-	public int getTargetMedianStringLength() {
-		return targetMedianStringLength;
+	
+	/**
+	 * @param targetLength
+	 * @return a median string of the required target length
+	 */
+	public String findMedianString(int targetLength) {
+		
+		this.globalBestScore = Integer.MAX_VALUE;
+		bestMedianString = EMPTY_STRING;
+		getMedianString(targetLength, EMPTY_STRING);
+		return this.bestMedianString;
+		
+	}
+	
+	/**
+	 * @param numberOfCharsInRemainingMedianString
+	 * @param medianString
+	 * recursively find a median string of the required length
+	 */
+	private void getMedianString(int numberOfCharsInRemainingMedianString, String medianString) {
+		
+		int currentScore = 0;
+		if (numberOfCharsInRemainingMedianString == 0) {
+			currentScore = getTotalMinimumHammingDistance(medianString);
+			if (currentScore < this.globalBestScore) {
+				this.globalBestScore = currentScore;
+				this.bestMedianString = medianString;
+			}
+			return;
+		}
+		
+		//Check for the bound condition
+		if (medianString.length() >= BRANCH_AND_BOUND_TEST_START_LENGTH && getTotalMinimumHammingDistance(medianString) > this.globalBestScore) {
+			return;
+		}
+		
+		//Append all possible base combinations to current median string and add nodes to the search tree
+		for (char base : Nucleotide.validBases) {
+			getMedianString(numberOfCharsInRemainingMedianString - 1, (new StringBuffer(medianString).append(base)).toString());
+		}
+		
+	}
+	
+	/**
+	 * @param proposedMedianString
+	 * @return the minimum possible total hamming distance between the proposed median string and the DNA
+	 * sequences by (1) finding the minimum hamming distance for each DNA sequence corresponding to all 
+	 * possible starting points (2) finding the sum of all the minimum values found in the step above.
+	 */
+	private int getTotalMinimumHammingDistance(String proposedMedianString) {
+		
+		int proposedMedianStringLength = proposedMedianString.length(), maximumMedianStringStartPosition = this.dnaSequenceLength - proposedMedianStringLength;
+		List<Integer> minimumHammingDistances = new ArrayList<Integer>(this.numberOfDnaSequences);
+		
+		//Find the minimum hamming distance between the proposed median string and each DNA sequence
+		for (int dnaSequenceCounter = 0; dnaSequenceCounter < this.numberOfDnaSequences; ++dnaSequenceCounter) {
+			int minimumHamingDistance = 0, currentMinimumHamingDistance = 0;
+			for (int medianStringStartPosition = 0; medianStringStartPosition < maximumMedianStringStartPosition; ++medianStringStartPosition) {
+				
+				List<Nucleotide> dnaSubSequence = this.dnaSequences.get(dnaSequenceCounter).subList(medianStringStartPosition, medianStringStartPosition + proposedMedianStringLength);
+				try {
+					currentMinimumHamingDistance = getHammingDistance(Nucleotide.getDnaSequence(proposedMedianString), dnaSubSequence);
+					if (currentMinimumHamingDistance < minimumHamingDistance) {
+						minimumHamingDistance = currentMinimumHamingDistance;
+					}
+				} catch (Exception e) {
+					System.err.println(proposedMedianString + " is not a valid nucleotide sequence.");
+					System.exit(0);
+				}
+			
+			
+			}
+			minimumHammingDistances.add(Integer.valueOf(minimumHamingDistance));
+		}
+		
+		//Return the sum of all the minimum hamming distances
+		int totalMinimumHammingDistance = 0;
+		for (Integer minimumHammingDistance : minimumHammingDistances) {
+			totalMinimumHammingDistance += minimumHammingDistance.intValue();
+		}
+		
+		return totalMinimumHammingDistance;
+	}
+	
+	/**
+	 * @param nucleotideSequence1
+	 * @param nucleotideSequence2
+	 * @return hamming distance between the two nucleotide sequences
+	 */
+	private int getHammingDistance(List<Nucleotide> nucleotideSequence1, List<Nucleotide> nucleotideSequence2) {
+		
+		int hammingDistance = 0;
+		int testLength = nucleotideSequence1.size();
+		for (int offsetCounter = 0; offsetCounter < testLength; ++offsetCounter) {
+			if (!nucleotideSequence1.get(offsetCounter).equals(nucleotideSequence2.get(offsetCounter))) {
+				++hammingDistance;
+			}
+		}
+		
+		return hammingDistance;
+		
 	}
 	
 }
