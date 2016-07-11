@@ -12,7 +12,7 @@ public class MedianStringFinderClient {
 	public static final String ERROR_MESSAGE_FOR_MEDIAN_STRING_NOT_FOUND = "Median string could not be found!!!";
 	public static final String HUMAN_DNA_SEQUENCES_FILE = "HumanSequence.txt";
 	public static final String HUMAN_DNA_SEQUENCES_REGEX = ">hg38[A-Za-z_0-9\\.]*";
-	public static final int TARGET_MEDIAN_STRING_LENGTH = 12;
+	public static final int TARGET_MEDIAN_STRING_LENGTH = 8;
 	
 	public static void main(String[] args) {
 		
