@@ -10,7 +10,9 @@ public class MedianStringFinderClient {
 
 	public static final String TEXT_FILE_EXTENSION = ".txt";
 	public static final String ERROR_MESSAGE_FOR_MEDIAN_STRING_NOT_FOUND = "Median string could not be found!!!";
-	public static final int TARGET_MEDIAN_STRING_LENGTH = 8;
+	public static final String HUMAN_DNA_SEQUENCES_FILE = "HumanSequence.txt";
+	public static final String HUMAN_DNA_SEQUENCES_REGEX = ">hg38[A-Za-z_0-9\\.]*";
+	public static final int TARGET_MEDIAN_STRING_LENGTH = 12;
 	
 	public static void main(String[] args) {
 		
@@ -20,7 +22,8 @@ public class MedianStringFinderClient {
 	
 	private String findMedianString() {
 		
-		List<List<Nucleotide>> dnaSequences = getDnaSequences();
+		//List<List<Nucleotide>> dnaSequences = getDnaSequences();
+		List<List<Nucleotide>> dnaSequences = getHumanDnaSequences();
 		try {
 			MedianStringFinder medianStringFinder = new MedianStringFinder(dnaSequences);
 			return medianStringFinder.findMedianString(TARGET_MEDIAN_STRING_LENGTH);
@@ -30,6 +33,42 @@ public class MedianStringFinderClient {
 		}
 		
 		return ERROR_MESSAGE_FOR_MEDIAN_STRING_NOT_FOUND;
+	}
+	
+	private List<List<Nucleotide>> getHumanDnaSequences() {
+		
+		
+		List<List<Nucleotide>> dnaSequences = new ArrayList<List<Nucleotide>>();
+		try {
+			
+			//Get file contents and make a single string
+			List<String> humanDnaSequences = getFileContents(HUMAN_DNA_SEQUENCES_FILE);
+			StringBuffer humanDnaSequencesStringBuffer = new StringBuffer(); 
+			for (String humanDnaSequenceString : humanDnaSequences) {
+				humanDnaSequencesStringBuffer.append(humanDnaSequenceString);
+			}
+			
+			//Split the string into multiple sequences
+			String humanDnaSequencesString = humanDnaSequencesStringBuffer.toString();
+			String[] humanDnaSequence = humanDnaSequencesString.split(HUMAN_DNA_SEQUENCES_REGEX);
+			
+			//Create the list of list of nucleotides
+			for (String nucleotideString : humanDnaSequence) {
+				if (nucleotideString.trim().length() != 0) {
+					dnaSequences.add(Nucleotide.getDnaSequence(nucleotideString.trim()));
+				}
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
+		return dnaSequences;
+		
 	}
 	
 	/**
