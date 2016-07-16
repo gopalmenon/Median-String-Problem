@@ -116,8 +116,7 @@ public class MedianStringFinder {
 	 */
 	private int getTotalMinimumHammingDistance(String proposedMedianString) {
 		
-		int proposedMedianStringLength = proposedMedianString.length(), maximumMedianStringStartPosition = this.dnaSequenceLength - proposedMedianStringLength;
-		List<Integer> minimumHammingDistances = new ArrayList<Integer>(this.numberOfDnaSequences);
+		int proposedMedianStringLength = proposedMedianString.length(), maximumMedianStringStartPosition = this.dnaSequenceLength - proposedMedianStringLength, totalMinimumHammingDistance = 0;
 		
 		//Find the minimum hamming distance between the proposed median string and each DNA sequence
 		for (int dnaSequenceCounter = 0; dnaSequenceCounter < this.numberOfDnaSequences; ++dnaSequenceCounter) {
@@ -137,13 +136,7 @@ public class MedianStringFinder {
 			
 			
 			}
-			minimumHammingDistances.add(Integer.valueOf(minimumHamingDistance));
-		}
-		
-		//Return the sum of all the minimum hamming distances
-		int totalMinimumHammingDistance = 0;
-		for (Integer minimumHammingDistance : minimumHammingDistances) {
-			totalMinimumHammingDistance += minimumHammingDistance.intValue();
+			totalMinimumHammingDistance += minimumHamingDistance;
 		}
 		
 		return totalMinimumHammingDistance;
