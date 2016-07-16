@@ -1,6 +1,8 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -8,6 +10,8 @@ import java.util.Set;
 public class MedianStringFinder {
 
 	public static final String EMPTY_STRING = "";
+	public static final String MEDIAN_STRING_KEY = "MEDIAN_STRING_KEY";
+	public static final String DNA_SEQUENCE_KEY = "DNA_SEQUENCE_KEY";
 	public static int BRANCH_AND_BOUND_TEST_START_LENGTH = 4;
 	
 	private int numberOfDnaSequences;
@@ -167,9 +171,11 @@ public class MedianStringFinder {
 	 * @param medianStringLength
 	 * @param numberOfMedianStringMutations
 	 * @param randomNumberGenerator
-	 * @return DNA sequences with embedded median strings
+	 * @return DNA sequences with embedded mutated median strings and original median string
 	 */
-	public static List<List<Nucleotide>> generateDnaSequences(int dnaSequenceLength, int numberOfDnaSequences, int medianStringLength, int numberOfMedianStringMutations, Random randomNumberGenerator) {
+	public static Map<String, Object> generateDnaSequences(int dnaSequenceLength, int numberOfDnaSequences, int medianStringLength, int numberOfMedianStringMutations, Random randomNumberGenerator) {
+		
+		Map<String, Object> returnValue = new HashMap<String, Object>();
 		
 		List<List<Nucleotide>> dnaSequences = new ArrayList<List<Nucleotide>>();
 		int numberOfNucleotideTypes = Nucleotide.validBases.length;
@@ -204,7 +210,10 @@ public class MedianStringFinder {
 			}
 		}
 
-		return dnaSequences;
+		returnValue.put(MEDIAN_STRING_KEY, medianString.toString());
+		returnValue.put(DNA_SEQUENCE_KEY, dnaSequences);
+		
+		return returnValue;
 		
 	}
 	
