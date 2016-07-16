@@ -1,5 +1,8 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 
 public class MedianStringFinder {
@@ -162,6 +165,97 @@ public class MedianStringFinder {
 		}
 		
 		return hammingDistance;
+		
+	}
+	
+	/**
+	 * @param dnaSequenceLength
+	 * @param numberOfDnaSequences
+	 * @param medianStringLength
+	 * @param numberOfMedianStringMutations
+	 * @param randomNumberGenerator
+	 * @return DNA sequences with embedded median strings
+	 */
+	public static List<List<Nucleotide>> generateDnaSequences(int dnaSequenceLength, int numberOfDnaSequences, int medianStringLength, int numberOfMedianStringMutations, Random randomNumberGenerator) {
+		
+		List<List<Nucleotide>> dnaSequences = new ArrayList<List<Nucleotide>>();
+		int numberOfNucleotideTypes = Nucleotide.validBases.length;
+			
+		//Generate median string
+		StringBuffer medianString = new StringBuffer();
+		for (int lengthCounter = 0; lengthCounter < medianStringLength; ++lengthCounter) {
+			medianString.append(Nucleotide.validBases[randomNumberGenerator.nextInt(numberOfNucleotideTypes)]);
+		}
+
+		//Generate DNA sequences
+		for (int sequenceCounter = 0; sequenceCounter < numberOfDnaSequences; ++sequenceCounter) {
+			
+			//Generate nucleotides inside DNA sequence
+			StringBuffer nucleotideString = new StringBuffer();
+			for (int lengthCounter = 0; lengthCounter < dnaSequenceLength; ++lengthCounter) {
+				nucleotideString.append(Nucleotide.validBases[randomNumberGenerator.nextInt(numberOfNucleotideTypes)]);
+			}
+			
+			//Mutate median string
+			StringBuffer mutatedMedianString = getMutatedMedianString(new StringBuffer(medianString.toString()), numberOfMedianStringMutations, medianStringLength, randomNumberGenerator);
+			
+			//Insert median string into the DNA sequence at a random position
+			nucleotideString.insert(randomNumberGenerator.nextInt(dnaSequenceLength), mutatedMedianString.toString());
+			
+			//Add a DNA sequence with mutated median string to the list of sequences
+			try {
+				dnaSequences.add(Nucleotide.getDnaSequence(nucleotideString.toString()));
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(0);
+			}
+		}
+
+		return dnaSequences;
+		
+	}
+	
+	/**
+	 * @param medianStringCopy
+	 * @param numberOfMedianStringMutations
+	 * @param medianStringLength
+	 * @param randomNumberGenerator
+	 * @return a mutated median string
+	 */
+	private static StringBuffer getMutatedMedianString(StringBuffer medianStringCopy, int numberOfMedianStringMutations, int medianStringLength, Random randomNumberGenerator) {
+		
+		Set<Integer> currentMutatedLocations = new HashSet<Integer>();
+		int medianStringMutationCounter = 0, proposedMutationLocation = 0;
+		
+		while (medianStringMutationCounter < numberOfMedianStringMutations) {
+			
+			proposedMutationLocation = randomNumberGenerator.nextInt(medianStringLength);
+			if (!currentMutatedLocations.contains(Integer.valueOf(proposedMutationLocation))) {
+				currentMutatedLocations.add(Integer.valueOf(proposedMutationLocation));
+				++medianStringMutationCounter;
+				medianStringCopy.setCharAt(proposedMutationLocation, getMutatedCharacter(medianStringCopy.charAt(proposedMutationLocation), randomNumberGenerator));
+			}
+			
+		}
+		
+		return medianStringCopy;
+		
+	}
+	
+	/**
+	 * @param currentCharacter
+	 * @param randomNumberGenerator
+	 * @return a mutated character different from the current character
+	 */
+	private static char getMutatedCharacter(char currentCharacter, Random randomNumberGenerator) {
+		
+		int numberOfNucleotideTypes = Nucleotide.validBases.length;
+		char proposedCharacter = Nucleotide.validBases[randomNumberGenerator.nextInt(numberOfNucleotideTypes)];
+		while (proposedCharacter == currentCharacter) {
+			proposedCharacter = Nucleotide.validBases[randomNumberGenerator.nextInt(numberOfNucleotideTypes)];
+		}
+		
+		return proposedCharacter;
 		
 	}
 	
