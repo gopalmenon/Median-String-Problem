@@ -2,7 +2,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -19,7 +21,9 @@ public class MedianStringFinderClient {
 	public static final String USE_HUMAN_DNA_SEQUENCE = "H";
 	public static final String USE_GENERATED_DNA_SEQUENCE = "G";
 	public static final String REPEAT_TILL_FAILURE_TO_FIND_MEDIAN_STRING = "F";
-	public static final int DEFAULT_TARGET_MEDIAN_STRING_LENGTH = 6;
+	public static final String TIMING_WITH_DNA_SEQUENCE_LENGTH = "L";
+	public static final String TIMING_WITH_MEDIAN_STRING_LENGTH = "M";
+	public static final int DEFAULT_TARGET_MEDIAN_STRING_LENGTH = 12;
 	
 	public static void main(String[] args) {
 		
@@ -36,6 +40,10 @@ public class MedianStringFinderClient {
 				System.out.println(medianStringFinderClient.findMedianString(medianStringFinderClient.getGeneratedDnaSequences(args), Integer.parseInt(args[3])));
 			} else if (REPEAT_TILL_FAILURE_TO_FIND_MEDIAN_STRING.equals(args[0].trim())) {
 				medianStringFinderClient.repeatTillFailureToFindMedianString();
+			} else if (TIMING_WITH_DNA_SEQUENCE_LENGTH.equals(args[0].trim())) {
+				medianStringFinderClient.timingWithDnaSequenceLength();
+			} else if (TIMING_WITH_MEDIAN_STRING_LENGTH.equals(args[0].trim())) {
+				medianStringFinderClient.timingWithMedianStringLength();
 			} else {
 				System.out.println(medianStringFinderClient.findMedianString(medianStringFinderClient.getGeneratedDnaSequences(args), Integer.parseInt(args[3])));
 			}
@@ -182,6 +190,103 @@ public class MedianStringFinderClient {
 				System.exit(0);
 			}
 		}
+		
+	}
+	
+	/**
+	 * Capture run time versus DNA Sequence Length
+	 */
+	@SuppressWarnings("unchecked")
+	private void timingWithDnaSequenceLength() {
+		
+		List<Integer> dnaSequenceLengths = new ArrayList<Integer>();
+		List<Long> runTimesInMilliseconds = new ArrayList<Long>();
+
+		int DNA_SEQUENCE_START_LENGTH = 20;
+		int DNA_SEQUENCE_MAXIMUM_LENGTH = 400;
+		int NUMBER_OF_DNA_SEQUENCES = 25;
+		int MEDIAN_STRING_LENGTH = 8;
+		int NUMBER_OF_MEDIAN_STRING_MUTATIONS = 0;
+		Random randomNumberGenerator = new Random(System.currentTimeMillis());
+		Map<String, Object> generatedDnaSequencesAndMedianString = null;
+		MedianStringFinder medianStringFinder = null;
+		String medianStringFound = null;
+		long timeBeforeRun = 0, runTime = 0;
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
+		
+		//Collect DNA sequence length vs run time statistics
+		for (int dnaSequenceLength = DNA_SEQUENCE_START_LENGTH; dnaSequenceLength <= DNA_SEQUENCE_MAXIMUM_LENGTH; dnaSequenceLength += 1) {
+			
+			generatedDnaSequencesAndMedianString = MedianStringFinder.generateDnaSequences(dnaSequenceLength, NUMBER_OF_DNA_SEQUENCES, MEDIAN_STRING_LENGTH, NUMBER_OF_MEDIAN_STRING_MUTATIONS, randomNumberGenerator);
+			try {
+				timeBeforeRun = System.currentTimeMillis();
+				medianStringFinder = new MedianStringFinder((List<List<Nucleotide>>) generatedDnaSequencesAndMedianString.get(MedianStringFinder.DNA_SEQUENCE_KEY));
+				medianStringFound = medianStringFinder.findMedianString(MEDIAN_STRING_LENGTH);
+				runTime = System.currentTimeMillis() - timeBeforeRun;
+				System.out.println(sdf.format(new Date()) + ": Median string " + medianStringFound + " found in " + runTime + " (ms) for DNA sequence length of " + dnaSequenceLength + ".");
+				dnaSequenceLengths.add(Integer.valueOf(dnaSequenceLength));
+				runTimesInMilliseconds.add(Long.valueOf(runTime));
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(0);
+			}
+
+		}
+		
+		//Print out the results
+		System.out.println("DNA Sequence Length: " + dnaSequenceLengths);
+		System.out.println("Run Time (ms): " + runTimesInMilliseconds);
+		
+	}
+	
+	/**
+	 * Capture run time versus Median String Length
+	 */
+	@SuppressWarnings("unchecked")
+	private void timingWithMedianStringLength() {
+	
+		List<Integer> medianStringLengths = new ArrayList<Integer>();
+		List<Long> runTimesInMilliseconds = new ArrayList<Long>();
+
+		int DNA_SEQUENCE_LENGTH = 200;
+		int NUMBER_OF_DNA_SEQUENCES = 25;
+		int MEDIAN_STRING_START_LENGTH = 4;
+		int MEDIAN_STRING_MAXIMUM_LENGTH = 18;
+		int NUMBER_OF_MEDIAN_STRING_MUTATIONS = 0;
+		int NUMBER_OF_ITERATIONS = 10;
+		
+		Random randomNumberGenerator = new Random(System.currentTimeMillis());
+		Map<String, Object> generatedDnaSequencesAndMedianString = null;
+		MedianStringFinder medianStringFinder = null;
+		String medianStringFound = null;
+		long timeBeforeRun = 0, runTime = 0;
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
+		
+		//Collect median string length vs run time statistics
+		for (int medianStringLength = MEDIAN_STRING_START_LENGTH; medianStringLength <= MEDIAN_STRING_MAXIMUM_LENGTH; medianStringLength += 1) {
+			
+			//Do 10 iterations per median string length
+			for (int iterationConter = 0; iterationConter < NUMBER_OF_ITERATIONS; ++iterationConter) {
+				generatedDnaSequencesAndMedianString = MedianStringFinder.generateDnaSequences(DNA_SEQUENCE_LENGTH, NUMBER_OF_DNA_SEQUENCES, medianStringLength, NUMBER_OF_MEDIAN_STRING_MUTATIONS, randomNumberGenerator);
+				try {
+					timeBeforeRun = System.currentTimeMillis();
+					medianStringFinder = new MedianStringFinder((List<List<Nucleotide>>) generatedDnaSequencesAndMedianString.get(MedianStringFinder.DNA_SEQUENCE_KEY));
+					medianStringFound = medianStringFinder.findMedianString(medianStringLength);
+					runTime = System.currentTimeMillis() - timeBeforeRun;
+					System.out.println(sdf.format(new Date()) + ": Median string " + medianStringFound + " found in " + runTime + " (ms) for median string length of " + medianStringLength + ".");
+					medianStringLengths.add(Integer.valueOf(medianStringLength));
+					runTimesInMilliseconds.add(Long.valueOf(runTime));
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(0);
+				}
+			}
+			
+		}
+		
+		//Print out the results
+		System.out.println("Median string Length: " + medianStringLengths);
+		System.out.println("Run Time (ms): " + runTimesInMilliseconds);
 		
 	}
 	
