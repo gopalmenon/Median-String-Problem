@@ -23,7 +23,7 @@ public class MedianStringFinderClient {
 	public static final String REPEAT_TILL_FAILURE_TO_FIND_MEDIAN_STRING = "F";
 	public static final String TIMING_WITH_DNA_SEQUENCE_LENGTH = "L";
 	public static final String TIMING_WITH_MEDIAN_STRING_LENGTH = "M";
-	public static final int DEFAULT_TARGET_MEDIAN_STRING_LENGTH = 12;
+	public static final int DEFAULT_TARGET_MEDIAN_STRING_LENGTH = 13;
 	
 	public static void main(String[] args) {
 		
@@ -169,27 +169,39 @@ public class MedianStringFinderClient {
 		
 		int DNA_SEQUENCE_LENGTH = 200;
 		int NUMBER_OF_DNA_SEQUENCES = 25;
-		int MEDIAN_STRING_LENGTH = 12;
+		int START_MEDIAN_STRING_LENGTH = 4;
+		int END_MEDIAN_STRING_LENGTH = 12;
 		Random randomNumberGenerator = new Random(System.currentTimeMillis());
 		Map<String, Object> generatedDnaSequencesAndMedianString = null;
 		String medianStringFound = null;
 		
-		for (int numberOfMedianStringMutations = 0; numberOfMedianStringMutations <= MEDIAN_STRING_LENGTH; ++numberOfMedianStringMutations) {
-			generatedDnaSequencesAndMedianString = MedianStringFinder.generateDnaSequences(DNA_SEQUENCE_LENGTH, NUMBER_OF_DNA_SEQUENCES, MEDIAN_STRING_LENGTH, numberOfMedianStringMutations, randomNumberGenerator);
-			try {
-				MedianStringFinder medianStringFinder = new MedianStringFinder((List<List<Nucleotide>>) generatedDnaSequencesAndMedianString.get(MedianStringFinder.DNA_SEQUENCE_KEY));
-				medianStringFound = medianStringFinder.findMedianString(MEDIAN_STRING_LENGTH);
-				if (!medianStringFound.equals(generatedDnaSequencesAndMedianString.get(MedianStringFinder.MEDIAN_STRING_KEY))) {
-					System.err.println("Could not find median string with " + numberOfMedianStringMutations + " mutations.");
-					break;
-				} else {
-					System.out.println("Found median string with " + numberOfMedianStringMutations + " mutations.");
+		List<Integer> medianStringLengthSettings = new ArrayList<Integer>();
+		List<Integer> numberOfMutationsForFailure = new ArrayList<Integer>();
+		
+		for (int medianStringLength = START_MEDIAN_STRING_LENGTH; medianStringLength <= END_MEDIAN_STRING_LENGTH; ++medianStringLength) {
+			medianStringLengthSettings.add(Integer.valueOf(medianStringLength));
+			for (int numberOfMedianStringMutations = 0; numberOfMedianStringMutations <= medianStringLength; ++numberOfMedianStringMutations) {
+				generatedDnaSequencesAndMedianString = MedianStringFinder.generateDnaSequences(DNA_SEQUENCE_LENGTH, NUMBER_OF_DNA_SEQUENCES, medianStringLength, numberOfMedianStringMutations, randomNumberGenerator);
+				try {
+					MedianStringFinder medianStringFinder = new MedianStringFinder((List<List<Nucleotide>>) generatedDnaSequencesAndMedianString.get(MedianStringFinder.DNA_SEQUENCE_KEY));
+					medianStringFound = medianStringFinder.findMedianString(medianStringLength);
+					if (!medianStringFound.equals(generatedDnaSequencesAndMedianString.get(MedianStringFinder.MEDIAN_STRING_KEY))) {
+						System.err.println("Median string length " + medianStringLength + ", could not find median string with " + numberOfMedianStringMutations + " mutations.");
+						numberOfMutationsForFailure.add(Integer.valueOf(numberOfMedianStringMutations));
+						break;
+					} else {
+						System.out.println("Median string length " + medianStringLength + ", found median string with " + numberOfMedianStringMutations + " mutations.");
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(0);
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(0);
 			}
 		}
+		
+		//Print the results
+		System.out.println("Median string lengths: " + medianStringLengthSettings);
+		System.out.println("Number of Mutations for Failure: " + numberOfMutationsForFailure);
 		
 	}
 	
