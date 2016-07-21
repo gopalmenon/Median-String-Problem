@@ -23,7 +23,7 @@ public class MedianStringFinderClient {
 	public static final String REPEAT_TILL_FAILURE_TO_FIND_MEDIAN_STRING = "F";
 	public static final String TIMING_WITH_DNA_SEQUENCE_LENGTH = "L";
 	public static final String TIMING_WITH_MEDIAN_STRING_LENGTH = "M";
-	public static final int DEFAULT_TARGET_MEDIAN_STRING_LENGTH = 13;
+	public static final int DEFAULT_TARGET_MEDIAN_STRING_LENGTH = 10;
 	
 	public static void main(String[] args) {
 		

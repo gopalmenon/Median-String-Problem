@@ -52,7 +52,7 @@
 \usepackage{csquotes}
 \usepackage{flexisym}
 \usepackage{algorithm,algpseudocode}
-
+\usepackage[toc,page]{appendix}
 \newcommand\Mycomb[2][n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
 
 \counterwithout{figure}{section}
@@ -88,26 +88,7 @@ Since we may not know what a motif looks like, we cannot just do a search for a 
 
 \item \textbf{Problem Definition}
 
-A formal problem definition is given below \cite{pevzner}:
-
-\horrule{0.5pt} \\[0.4cm]
-\textbf{Median String Problem:}
-
-\textit{Given a set of DNA sequences, find a median string.}
-
-\textbf{Input:} A $t \times n$ matrix DNA, and $L$, the length of the pattern to find.
-\textbf{Output:} A string $v$ of $L$ nucleotides that minimizes $TotalDistance(v, DNA)$ over all strings of that length.
-
-\horrule{0.5pt} \\[0.4cm]
-In other words, given a set of $t$ DNA sequences of length $n$ and a target median string length of $L$, we need to find a median string $v$ of length $L$ nucleotides that minimizes $TotalDistance(v, DNA)$. Here $TotalDistance(v, DNA)$ is the smallest hamming distance between the median string and all possible starting points starting points in each of the DNA sequences. 
-
-\begin{verbatim}  caggggcaggaagacagagcagctgacacttccagaaatagctggccaga
-                  gtagtaa\end{verbatim}
-
-In the above string of nucleotides (the longer one could be thought of as a DNA sequence and the shorter one as a potential median string), the hamming distance at the position shown will be the number of nucleotides that are different. We can slide the potential median string and find the smallest hamming distance between it and the DNA sequence. The total distance will be the sum of minimum hamming distances between the potential median string and all the DNA sequences. The string of length $L$ that minimizes the total distance will be median string.
-\item \textbf{Results with Synthetic Data}
-
-\begin{figure}[h]
+\begin{figure}[!h]
 \centering
 \includegraphics[width=6.75in]{Figures/MedianStringLenVsMutations.png}
 \caption{Median String Length vs Number of Mutations till failure}
@@ -131,16 +112,67 @@ In the above string of nucleotides (the longer one could be thought of as a DNA 
 \begin{figure}[h]
 \centering
 \includegraphics[width=6.75in]{Figures/MedianStringLengthvsLog2RunTimeScatterplot.png}
-\caption{Median String Length vs log base 2 Run Time Scatterplot}
+\caption{Median String Length vs Run Time Scatterplot}
 \label{MedLenVLog2RunTime}
 \end{figure}
 
-\item \textbf{Results with Real Data}
+A formal problem definition is given below \cite{pevzner}:
 
+\horrule{0.5pt} \\[0.4cm]
+\textbf{Median String Problem:}
 
+\textit{Given a set of DNA sequences, find a median string.}
+
+\textbf{Input:} A $t \times n$ matrix DNA, and $L$, the length of the pattern to find.
+\textbf{Output:} A string $v$ of $L$ nucleotides that minimizes $TotalDistance(v, DNA)$ over all strings of that length.
+
+\horrule{0.5pt} \\[0.4cm]
+In other words, given a set of $t$ DNA sequences of length $n$ and a target median string length of $L$, we need to find a median string $v$ of length $L$ nucleotides that minimizes $TotalDistance(v, DNA)$. Here $TotalDistance(v, DNA)$ is the smallest hamming distance between the median string and all possible starting points starting points in each of the DNA sequences. 
+
+\begin{verbatim}  caggggcaggaagacagagcagctgacacttccagaaatagctggccaga
+                  gtagtaa\end{verbatim}
+
+In the above string of nucleotides (the longer one could be thought of as a DNA sequence and the shorter one as a potential median string), the hamming distance at the position shown will be the number of nucleotides that are different. We can slide the potential median string and find the smallest hamming distance between it and the DNA sequence. The total distance will be the sum of minimum hamming distances between the potential median string and all the DNA sequences. The string of length $L$ that minimizes the total distance will be median string.
+
+A median string described above would indicate a regulatory motif and its mutations that occur more frequently than expected, in a DNA sequence.
+
+\item \textbf{Results with Synthetic Data}
+
+\begin{enumerate}
+
+\item \textbf{Mutations till failure}
+
+Figure \ref{MedStrLenVMutations} shows the trend for the median string length versus the number of mutations at which the system fails to find the inserted median string. The test was done with 25 DNA sequences each of length 200. The blue circles are the data points and the red line is the line of best fit. It shows that with increasing median string length it takes more mutations for the system to fail to find the same median string that was inserted.
+
+\item \textbf{DNA Sequence Length vs Run Time}
+
+Figure \ref{SeqLenVRunTime} shows the plot for DNA Sequence Length vs Run Time for finding a median string. The data was collected for DNA Sequence Length varying from 20 to 400 nucleotides, 25 DNA sequences and a median string length of 8 with no mutations. For each DNA Sequence Length we can see data points varying from low to high run times. The reason is that the median string is randomly generated and those median strings that are checked for first in the branch and bound, are found earlier. The red line is the line of best fit and it shows a linear increase in run time with DNA Sequence Length. 
+
+\item \textbf{Median String Length vs Run Time}
+
+Figures \ref{MedLenVRunTime} and \ref{MedLenVLog2RunTime} show the plots for median string length vs run time to find a median string. The only difference between the two is that Figure \ref{MedLenVLog2RunTime} has a logarithmic scale for the run time. The plot seems to indicate that the run time is exponential in the length of the median string. The reason is that the logarithmic plot shows a linear relation. 
 
 \end{enumerate}
 
+\item \textbf{Results with Real Data}
+
+Here are the results for the target length and the corresponding median strings found when run on the human DNA.\\
+
+\begin{tabular}{ | c | r |}
+  \hline			
+  Target Length & Median String found  \\
+  \hline			
+  10 & AAAATTCAAA  \\
+  \hline			
+  11 & CTCCTGACCTC  \\
+  \hline			
+  12 & TTTTGTATTTTT  \\
+  \hline  
+\end{tabular}
+
+\end{enumerate}
+
+\clearpage
 %----------------------------------------------------------------------------------------
 \begin{thebibliography}{9}
 
@@ -148,5 +180,30 @@ In the above string of nucleotides (the longer one could be thought of as a DNA 
 Jones, Neil C., and Pavel Pevzner. \enquote{Regulatory Motifs in DNA Sequences.} \textit{An Introduction to Bioinformatics Algorithms}. Cambridge, MA: MIT, 2004. N. pag. Print.
 
 \end{thebibliography}
+
+\appendix
+\section{\\Program Parameters} \label{App:AppendixA}
+
+These are the run time parameters to be provided while running the program.\\
+
+\begin{tabular}{ l | c | c | c | c | c | }
+\cline{2-6}
+  & \multicolumn{5}{| c |}{ Parameter Number} \\
+  \hline			
+  Usage &1 & 2 & 3 & 4 & 5 \\
+  \hline			
+  DNA sequences in .txt files &T &    &   &   &   \\
+  \hline			
+  Use Human DNA sequences  &H &    &   &   &   \\
+  \hline			
+  Use generated DNA sequences  &G & DNA Seq Len  &  \# of DNA Seq &  Median Str Len &  \# of mutations \\
+  \hline			
+  Repeat till median string not found  &F &    &   &   &   \\
+  \hline			
+  Runtime with DNA sequence length  &L &    &   &   &   \\
+ \hline			
+  Runtime with median string length  &M &    &   &   &   \\
+   \hline  
+\end{tabular}
 
 \end{document}
